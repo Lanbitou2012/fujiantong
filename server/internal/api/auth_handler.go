@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strings"
+
 	"fujiantong/internal/config"
 	"fujiantong/internal/service"
 	"fujiantong/internal/wechat"
@@ -106,9 +108,15 @@ func (h *AuthHandler) WechatLogin(c *gin.Context) {
 		FailErr(c, err)
 		return
 	}
-	// 处理推广员绑定（入驻时 state=promoter_<id>）
+	// 处理推广员绑定（入驻时 state=promoter_<id>，或显式 promoter_id 参数）
+	var promoterID uint64
 	if pid := c.Query("promoter_id"); pid != "" {
-		_ = h.Svc.BindPromoter(user.ID, atoui64(pid))
+		promoterID = atoui64(pid)
+	} else if state := c.Query("state"); strings.HasPrefix(state, "promoter_") {
+		promoterID = atoui64(strings.TrimPrefix(state, "promoter_"))
+	}
+	if promoterID > 0 {
+		_ = h.Svc.BindPromoter(user.ID, promoterID)
 	}
 	OK(c, gin.H{"token": token, "user": user})
 }

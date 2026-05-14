@@ -45,13 +45,15 @@ if [[ "$MODE" == "all" || "$MODE" == "frontend" ]]; then
   echo "==> [3/5] 安装 admin 依赖"
   npm install --prefix admin --silent --no-audit --no-fund
 
-  # 修复某些 npm 镜像/Linux 文件系统下 .bin 缺失可执行位的问题
-  if [ -d admin/node_modules/.bin ]; then
-    chmod -R +x admin/node_modules/.bin 2>/dev/null || true
+  # 修复某些 npm 镜像下二进制 / .bin 缺失可执行位的问题
+  if [ -d admin/node_modules ]; then
+    find admin/node_modules -path "*/bin/*.js" -exec chmod +x {} \; 2>/dev/null || true
+    find admin/node_modules -path "*/.bin/*" -exec chmod +x {} \; 2>/dev/null || true
   fi
 
   echo "==> [4/5] 编译 admin（输出到 server/public/）"
-  npm run build --prefix admin
+  # 直接用 node 调用 vite，绕过 .bin symlink 的权限问题
+  ( cd admin && node ./node_modules/vite/bin/vite.js build )
 fi
 
 echo "==> [5/5] 通过 PM2 重启后端"

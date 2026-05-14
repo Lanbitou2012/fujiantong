@@ -106,11 +106,14 @@ func (c *Container) HandleAuthorizationEvent(componentAppID, componentSecret, au
 		log.Printf("[WxAuth] GetAuthorizerInfo 失败（继续）: %v", derr)
 	}
 
-	// 查找用户：先按 bound_appid，再按 principal_name 兜底
+	// 查找用户：先按 bound_appid
 	u, err := c.UserRepo.GetByAppID(appID)
 	if err != nil {
 		// 不存在 → 创建新作者
+		// wx_unionid 是 NOT NULL UNIQUE，但 component 授权不返回 unionid，
+		// 这里用 "app:<appid>" 作为合成占位值保证唯一性，将来作者真扫码登录时再覆盖。
 		newUser := &model.User{
+			WxUnionID:              "app:" + appID,
 			BoundAppID:             appID,
 			Nickname:               nickname,
 			AvatarURL:              avatar,

@@ -30,6 +30,11 @@ func main() {
 	}
 	svc := service.NewContainer(config.DB, wxComp)
 
+	// 注入动态配置读取器：让 config.Get*Config() 能从 system_settings 读取
+	config.SetSettingsGetter(func(key string) string {
+		return svc.SettingRepo.GetRaw(key)
+	})
+
 	// 5. 启动 Cron 调度器（W3 P0：自动化数据 Pipeline）
 	sched := scheduler.New(svc)
 	sched.Start()

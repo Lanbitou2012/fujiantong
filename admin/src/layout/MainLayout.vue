@@ -71,6 +71,10 @@
             <el-icon><Upload /></el-icon>
             <template #title>部署管理</template>
           </el-menu-item>
+          <el-menu-item index="/settings">
+            <el-icon><Setting /></el-icon>
+            <template #title>系统设置</template>
+          </el-menu-item>
         </el-menu-item-group>
       </el-menu>
     </el-aside>

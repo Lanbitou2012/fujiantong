@@ -50,6 +50,12 @@ const routes = [
         meta: { title: '部署管理', role: 'admin' },
       },
       {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/admin/Settings.vue'),
+        meta: { title: '系统设置', role: 'admin' },
+      },
+      {
         path: 'promoter/qrcode',
         name: 'PromoterQRCode',
         component: () => import('@/views/promoter/MyQRCode.vue'),

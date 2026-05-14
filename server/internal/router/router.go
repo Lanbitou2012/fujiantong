@@ -33,6 +33,7 @@ func SetupRouter(svc *service.Container) *gin.Engine {
 	promoterH := api.NewPromoterHandler(svc)
 	adminH := api.NewAdminHandler(svc)
 	wxH := api.NewWxHandler(svc)
+	settingsH := api.NewSettingsHandler(svc)
 
 	v1 := r.Group("/api/v1")
 	{
@@ -101,6 +102,11 @@ func SetupRouter(svc *service.Container) *gin.Engine {
 			adminGroup.POST("/settlements/:id/approve", adminH.ApproveSettlement)
 			adminGroup.POST("/settlements/:id/mark-paid", adminH.MarkSettlementPaid)
 			adminGroup.GET("/deployments", adminH.ListDeployments)
+
+			// 设置：修改密码 + 平台凭据（微信开放平台 / COS）
+			adminGroup.POST("/settings/password", settingsH.ChangePassword)
+			adminGroup.GET("/settings/platform", settingsH.GetPlatformSettings)
+			adminGroup.PUT("/settings/platform", settingsH.UpdatePlatformSettings)
 		}
 	}
 

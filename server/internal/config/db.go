@@ -43,6 +43,7 @@ func InitDB() {
 		&model.MpDeployment{},
 		&model.MpAudit{},
 		&model.AdminActionLog{},
+		&model.SystemSetting{},
 	)
 	if err != nil {
 		log.Printf("Warning: Failed to AutoMigrate tables: %v\n", err)

@@ -9,15 +9,16 @@ import (
 
 // Container 统一持有所有 repo 和微信客户端，供各 service 使用。
 type Container struct {
-	DB              *gorm.DB
-	UserRepo        *repo.UserRepo
-	FileRepo        *repo.FileRepo
-	AuthRepo        *repo.AuthorizationRepo
-	FinanceRepo     *repo.FinanceRepo
-	WechatRepo      *repo.WechatRepo
-	DeploymentRepo  *repo.DeploymentRepo
-	AdminRepo       *repo.AdminRepo
-	WxComponent     *wechat.ComponentClient
+	DB             *gorm.DB
+	UserRepo       *repo.UserRepo
+	FileRepo       *repo.FileRepo
+	AuthRepo       *repo.AuthorizationRepo
+	FinanceRepo    *repo.FinanceRepo
+	WechatRepo     *repo.WechatRepo
+	DeploymentRepo *repo.DeploymentRepo
+	AdminRepo      *repo.AdminRepo
+	SettingRepo    *repo.SettingRepo
+	WxComponent    *wechat.ComponentClient
 }
 
 func NewContainer(db *gorm.DB, wxComp *wechat.ComponentClient) *Container {
@@ -30,6 +31,7 @@ func NewContainer(db *gorm.DB, wxComp *wechat.ComponentClient) *Container {
 		WechatRepo:     repo.NewWechatRepo(db),
 		DeploymentRepo: repo.NewDeploymentRepo(db),
 		AdminRepo:      repo.NewAdminRepo(db),
+		SettingRepo:    repo.NewSettingRepo(db),
 		WxComponent:    wxComp,
 	}
 }

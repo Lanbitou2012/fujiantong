@@ -101,7 +101,6 @@ func SetupRouter(svc *service.Container) *gin.Engine {
 			adminGroup.GET("/settlements", adminH.ListSettlements)
 			adminGroup.POST("/settlements/:id/approve", adminH.ApproveSettlement)
 			adminGroup.POST("/settlements/:id/mark-paid", adminH.MarkSettlementPaid)
-			adminGroup.GET("/deployments", adminH.ListDeployments)
 
 			// 设置：修改密码 + 平台凭据（微信开放平台 / COS）
 			adminGroup.POST("/settings/password", settingsH.ChangePassword)

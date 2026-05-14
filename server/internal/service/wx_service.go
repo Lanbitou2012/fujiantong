@@ -1,7 +1,6 @@
 package service
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -165,8 +164,9 @@ func (c *Container) HandleAuthorizationEvent(componentAppID, componentSecret, au
 		ExpiresAt:    time.Now().Add(time.Duration(info.ExpiresIn-300) * time.Second),
 	})
 
-	// 触发自动部署流水线（异步）
-	go c.triggerDeployPipeline(componentAppID, componentSecret, appID)
+	// V3.0：模板小程序自动部署流水线（commit/submit_audit/release）挪到 V1.5。
+	// V1.0 的链路是：作者授权完成 → 落库 user → 跳前端 /auth-success 落 token，
+	// 作者直接进工作台上传文件、复制超链接到公众号文章。
 
 	return u, nil
 }
@@ -183,245 +183,9 @@ func (c *Container) HandleDeauthorizationEvent(appID string) error {
 	return c.AuthRepo.Update(auth)
 }
 
-// triggerDeployPipeline 授权后自动部署流水线（§15.2.8）
-func (c *Container) triggerDeployPipeline(componentAppID, componentSecret, appID string) {
-	log.Printf("[DeployPipeline] 开始为 %s 执行自动部署流水线", appID)
-
-	// 创建 deployment 记录
-	deploy := &model.MpDeployment{
-		AppID:  appID,
-		Status: "pending",
-	}
-	// 查用户
-	if auth, err := c.AuthRepo.GetByAppID(appID); err == nil {
-		deploy.UserID = auth.UserID
-	}
-	if err := c.DeploymentRepo.CreateDeployment(deploy); err != nil {
-		log.Printf("[DeployPipeline] 创建部署记录失败: %v", err)
-		return
-	}
-
-	// 获取 authorizer_access_token
-	authToken, err := c.EnsureAuthorizerToken(componentAppID, componentSecret, appID)
-	if err != nil {
-		log.Printf("[DeployPipeline] 获取 authorizer token 失败: %v", err)
-		c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "configuring_failed")
-		return
-	}
-
-	// ─── 阶段 1：基础配置 ───
-	c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "configuring")
-
-	componentToken, _ := c.EnsureComponentToken(componentAppID, componentSecret)
-
-	// 1.1 SetShareRatio(28)
-	if err := c.WxComponent.SetShareRatio(componentToken, wechat.SetShareRatioReq{
-		ShareRatio:   28,
-		AuthorizerID: appID,
-	}); err != nil {
-		log.Printf("[DeployPipeline] SetShareRatio 失败: %v", err)
-	}
-
-	// 1.2 AgencyCreateAdunit × 3
-	adSlots := []struct {
-		slot string
-		name string
-	}{
-		{"slot_id_reward_video", "激励视频"},
-		{"slot_id_interstitial", "插屏广告"},
-		{"slot_id_splash", "开屏广告"},
-	}
-	for _, s := range adSlots {
-		resp, err := c.WxComponent.AgencyCreateAdunit(authToken, wechat.CreateAdunitReq{
-			AdSlot: s.slot,
-			Name:   s.name,
-		})
-		if err != nil {
-			log.Printf("[DeployPipeline] 创建广告位 %s 失败: %v", s.slot, err)
-		} else {
-			log.Printf("[DeployPipeline] 广告位 %s 创建成功: %s", s.slot, resp.AdUnitID)
-		}
-	}
-
-	// 1.3 wxa/add_category（工具→办公）
-	if err := c.WxComponent.AddCategory(authToken, []wechat.CategoryItem{
-		{First: 287, Second: 296, FirstName: "工具", SecondName: "办公"},
-	}); err != nil {
-		log.Printf("[DeployPipeline] AddCategory 失败: %v", err)
-	}
-
-	// 1.4 wxa/modifyserverdomain
-	if err := c.WxComponent.ModifyServerDomain(authToken, wechat.ModifyDomainReq{
-		Action:         "set",
-		RequestDomain:  []string{"https://fujian.5g6g.top"},
-		UploadDomain:   []string{"https://fujian.5g6g.top"},
-		DownloadDomain: []string{"https://fujian.5g6g.top"},
-	}); err != nil {
-		log.Printf("[DeployPipeline] ModifyServerDomain 失败: %v", err)
-	}
-
-	// 1.5 wxa/setMpPrivacySetting（黄金版本）
-	if err := c.WxComponent.SetPrivacySetting(authToken, wechat.PrivacySettingReq{
-		PrivacyVer: 2,
-		OwnerSetting: map[string]string{
-			"contact_email": "552002521@qq.com",
-			"notice_method": "弹窗提示",
-		},
-		SettingList: []wechat.PrivacyItem{
-			{PrivacyKey: "UserInfo", PrivacyText: "用于展示您的头像和昵称"},
-			{PrivacyKey: "Location", PrivacyText: "不收集位置信息"},
-		},
-	}); err != nil {
-		log.Printf("[DeployPipeline] SetPrivacySetting 失败: %v", err)
-	}
-
-	// ─── 阶段 2：代码部署 ───
-	c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "committing")
-
-	tmpl, err := c.DeploymentRepo.GetActiveTemplate()
-	if err != nil {
-		log.Printf("[DeployPipeline] 未找到激活模板版本: %v", err)
-		c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "waiting_template_fix")
-		return
-	}
-
-	extJSON := buildExtJSON(appID, deploy.UserID)
-	deploy.TemplateVersionID = tmpl.ID
-	deploy.TemplateID = tmpl.TemplateID
-	deploy.UserVersion = tmpl.UserVersion
-	deploy.ExtJSON = extJSON
-
-	if err := c.WxComponent.Commit(authToken, wechat.CommitReq{
-		TemplateID:  tmpl.TemplateID,
-		ExtJSON:     extJSON,
-		UserVersion: tmpl.UserVersion + fmt.Sprintf("-uid%d", deploy.UserID),
-		UserDesc:    tmpl.UserDesc,
-	}); err != nil {
-		log.Printf("[DeployPipeline] Commit 失败: %v", err)
-		c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "committing_failed")
-		return
-	}
-
-	// ─── 阶段 3：提审 ───
-	c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "submitted_for_audit")
-
-	auditResp, err := c.WxComponent.SubmitAudit(authToken, wechat.SubmitAuditReq{
-		ItemList: []wechat.AuditItemReq{
-			{FirstClass: "工具", SecondClass: "办公", FirstID: 287, SecondID: 296, Title: "附件通"},
-		},
-		VersionDesc:  "附件通 " + tmpl.UserVersion,
-		FeedbackInfo: "552002521@qq.com",
-		UGCDeclare: &wechat.UGCDeclare{
-			Scene:        []int{1, 2},
-			Method:       []int{1},
-			HasAuditTeam: 1,
-			AuditDesc:    "平台对所有用户上传的附件进行机审（msgSecCheck + mediaCheckAsync），违规内容自动拦截",
-		},
-		PrivacyAPINotUse: true,
-	})
-	if err != nil {
-		log.Printf("[DeployPipeline] SubmitAudit 失败: %v", err)
-		c.DeploymentRepo.UpdateDeploymentStatus(deploy.ID, "audit_submit_failed")
-		return
-	}
-
-	deploy.AuditID = auditResp.AuditID
-	_ = c.DeploymentRepo.UpdateDeployment(deploy)
-
-	// 创建审核记录
-	_ = c.DeploymentRepo.CreateAudit(&model.MpAudit{
-		AppID:        appID,
-		UserID:       deploy.UserID,
-		DeploymentID: deploy.ID,
-		WxAuditID:    auditResp.AuditID,
-		VersionDesc:  tmpl.UserVersion,
-		Status:       "submitted",
-		SubmittedAt:  time.Now(),
-	})
-
-	log.Printf("[DeployPipeline] %s 提审成功, auditid=%d", appID, auditResp.AuditID)
-}
-
-// HandleAuditSuccess 审核通过 → 自动发布
-func (c *Container) HandleAuditSuccess(appID string, componentAppID, componentSecret string) error {
-	authToken, err := c.EnsureAuthorizerToken(componentAppID, componentSecret, appID)
-	if err != nil {
-		return err
-	}
-	if err := c.WxComponent.Release(authToken); err != nil {
-		return fmt.Errorf("release 失败: %w", err)
-	}
-	// 更新部署状态
-	deploy, err := c.DeploymentRepo.GetLatestDeployment(appID)
-	if err == nil {
-		deploy.Status = "live"
-		_ = c.DeploymentRepo.UpdateDeployment(deploy)
-	}
-	return nil
-}
-
-// HandleAuditFail 审核驳回 → 分流
-func (c *Container) HandleAuditFail(appID, reason string) error {
-	deploy, err := c.DeploymentRepo.GetLatestDeployment(appID)
-	if err != nil {
-		return err
-	}
-	deploy.FailReason = reason
-
-	// 关键词分流
-	category := "unknown"
-	reasonLower := reason
-	if contains(reasonLower, "代码", "code", "bug") {
-		category = "code"
-		deploy.Status = "waiting_template_fix"
-	} else if contains(reasonLower, "资质", "类目", "主体", "证件") {
-		category = "qualification"
-		deploy.Status = "waiting_author_supplement"
-	} else {
-		deploy.Status = "manual_review"
-	}
-
-	_ = c.DeploymentRepo.UpdateDeployment(deploy)
-
-	// 更新审核记录
-	audit, err := c.DeploymentRepo.GetAuditByDeployment(deploy.ID)
-	if err == nil {
-		now := time.Now()
-		audit.Status = "fail"
-		audit.FailReason = reason
-		audit.FailCategory = category
-		audit.ResultAt = &now
-		_ = c.DeploymentRepo.UpdateAudit(audit)
-	}
-	return nil
-}
-
-func buildExtJSON(appID string, userID uint64) string {
-	ext := map[string]any{
-		"extEnable": true,
-		"extAppid":  appID,
-		"ext": map[string]any{
-			"platformUserId": fmt.Sprintf("uid_%d", userID),
-			"apiBaseUrl":     "https://fujian.5g6g.top",
-			"privacyVersion": "v1.0",
-		},
-	}
-	b, _ := json.Marshal(ext)
-	return string(b)
-}
-
-func contains(s string, keywords ...string) bool {
-	for _, k := range keywords {
-		if len(s) >= len(k) {
-			for i := 0; i <= len(s)-len(k); i++ {
-				if s[i:i+len(k)] == k {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
+// V3.0：以下流水线相关函数（triggerDeployPipeline / HandleAuditSuccess / HandleAuditFail）
+// 全部已删除，对应能力挪到 V1.5 P1 重新实现。
+// 真要重写时可参考 e:\项目\小项目\附件通\CORE_ARCHITECTURE.v2.8.history.md §15.2.8。
 
 func formatFuncInfo(funcInfo []wechat.FuncScopeItem) string {
 	ids := make([]string, 0, len(funcInfo))

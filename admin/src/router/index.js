@@ -32,6 +32,13 @@ const routes = [
         meta: { title: '我的收益' },
       },
       {
+        // V3.0：管理员一站式运维中心（用户 / 结算 / 系统设置 三 Tab 合并）
+        path: 'v2hub',
+        name: 'V2Hub',
+        component: () => import('@/views/admin/V2Hub.vue'),
+        meta: { title: '运维中心', role: 'admin' },
+      },
+      {
         path: 'users',
         name: 'Users',
         component: () => import('@/views/admin/UserList.vue'),
@@ -42,12 +49,6 @@ const routes = [
         name: 'Settlements',
         component: () => import('@/views/admin/SettlementList.vue'),
         meta: { title: '结算管理', role: 'admin' },
-      },
-      {
-        path: 'deployments',
-        name: 'Deployments',
-        component: () => import('@/views/admin/DeploymentList.vue'),
-        meta: { title: '部署管理', role: 'admin' },
       },
       {
         path: 'settings',
@@ -88,23 +89,12 @@ const routes = [
     component: () => import('@/views/public/FileDownload.vue'),
     meta: { public: true },
   },
-  // ─── 作者 H5 入驻流程（V2.8 §15.2.3） ───
+  // ─── 作者 H5 入驻落地页（V3.0：单页直跳微信扫码授权，无中间页） ───
   {
     path: '/onboarding',
     name: 'OnboardingWelcome',
     component: () => import('@/views/onboarding/Welcome.vue'),
     meta: { public: true },
-  },
-  {
-    path: '/onboarding/register-guide',
-    name: 'OnboardingRegisterGuide',
-    component: () => import('@/views/onboarding/RegisterGuide.vue'),
-    // 该页面需登录后查看
-  },
-  {
-    path: '/onboarding/authorize',
-    name: 'OnboardingAuthorize',
-    component: () => import('@/views/onboarding/Authorize.vue'),
   },
 ]
 

@@ -131,16 +131,13 @@ func (h *WxHandler) ComponentNotify(c *gin.Context) {
 		return
 	}
 
-	componentCfg := config.GetComponentConfig()
+	// V3.0：模板小程序自动部署 / 提审 / 发布流水线已挪到 V1.5 P1。
+	// 这里仅记录审核事件日志，不再触发任何动作。
 	switch evt.Event {
 	case "weapp_audit_success":
-		log.Printf("[WxNotify] %s 审核通过", appID)
-		if err := h.Svc.HandleAuditSuccess(appID, componentCfg.AppID, componentCfg.AppSecret); err != nil {
-			log.Printf("[WxNotify] 发布失败: %v", err)
-		}
+		log.Printf("[WxNotify] %s 审核通过（V3.0 不自动 release）", appID)
 	case "weapp_audit_fail":
 		log.Printf("[WxNotify] %s 审核驳回: %s", appID, evt.Reason)
-		_ = h.Svc.HandleAuditFail(appID, evt.Reason)
 	case "weapp_audit_delay":
 		log.Printf("[WxNotify] %s 审核延期", appID)
 	default:

@@ -54,26 +54,14 @@
           </el-menu-item>
         </el-menu-item-group>
 
-        <!-- ─── 平台管理（is_admin=true） ─── -->
+        <!-- ─── 平台管理（is_admin=true，V3.0 合并为运维中心） ─── -->
         <el-menu-item-group v-if="userStore.isAdmin">
           <template #title>
             <span class="group-title">平台管理</span>
           </template>
-          <el-menu-item index="/users">
-            <el-icon><User /></el-icon>
-            <template #title>用户管理</template>
-          </el-menu-item>
-          <el-menu-item index="/settlements">
-            <el-icon><Money /></el-icon>
-            <template #title>结算审核</template>
-          </el-menu-item>
-          <el-menu-item index="/deployments">
-            <el-icon><Upload /></el-icon>
-            <template #title>部署管理</template>
-          </el-menu-item>
-          <el-menu-item index="/settings">
+          <el-menu-item index="/v2hub">
             <el-icon><Setting /></el-icon>
-            <template #title>系统设置</template>
+            <template #title>运维中心</template>
           </el-menu-item>
         </el-menu-item-group>
       </el-menu>

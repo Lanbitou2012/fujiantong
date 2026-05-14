@@ -10,31 +10,6 @@ type FinanceRepo struct{ *Repo }
 
 func NewFinanceRepo(db *gorm.DB) *FinanceRepo { return &FinanceRepo{New(db)} }
 
-// ─── DailyAdStat ───
-
-func (r *FinanceRepo) BatchCreateAdStats(stats []model.DailyAdStat) error {
-	if len(stats) == 0 {
-		return nil
-	}
-	return r.DB.CreateInBatches(stats, 100).Error
-}
-
-func (r *FinanceRepo) GetAdStats(appID, startDate, endDate string) ([]model.DailyAdStat, error) {
-	var list []model.DailyAdStat
-	err := r.DB.Where("appid = ? AND date >= ? AND date <= ?", appID, startDate, endDate).
-		Order("date ASC").Find(&list).Error
-	return list, err
-}
-
-// SumIncomeByAppID 统计某小程序某期间总收入（分）
-func (r *FinanceRepo) SumIncomeByAppID(appID, startDate, endDate string) (int64, error) {
-	var total int64
-	err := r.DB.Model(&model.DailyAdStat{}).
-		Where("appid = ? AND date >= ? AND date <= ?", appID, startDate, endDate).
-		Select("COALESCE(SUM(income), 0)").Scan(&total).Error
-	return total, err
-}
-
 // ─── SettlementRecord ───
 
 func (r *FinanceRepo) CreateSettlement(s *model.SettlementRecord) error {

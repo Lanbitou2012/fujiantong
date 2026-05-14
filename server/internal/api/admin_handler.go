@@ -43,14 +43,10 @@ func (h *AdminHandler) TodoList(c *gin.Context) {
 	var bannedCount int64
 	h.Svc.DB.Model(&model.File{}).Where("media_check_status = 'reject'").Count(&bannedCount)
 
-	// 部署异常
-	deployStats, _ := h.Svc.DeploymentRepo.CountByStatus()
-
 	OK(c, gin.H{
 		"settlements_to_approve": toApprove,
 		"settlements_to_pay":     toPay,
 		"files_to_review":        bannedCount,
-		"deploy_status":          deployStats,
 	})
 }
 
@@ -155,16 +151,4 @@ func (h *AdminHandler) MarkSettlementPaid(c *gin.Context) {
 		return
 	}
 	OKMsg(c, "已标记打款")
-}
-
-// ListDeployments GET /api/v1/admin/deployments
-func (h *AdminHandler) ListDeployments(c *gin.Context) {
-	page, size := pageParams(c)
-	status := c.Query("status")
-	list, total, err := h.Svc.DeploymentRepo.ListDeployments(page, size, status)
-	if err != nil {
-		FailErr(c, err)
-		return
-	}
-	OK(c, gin.H{"list": list, "total": total})
 }

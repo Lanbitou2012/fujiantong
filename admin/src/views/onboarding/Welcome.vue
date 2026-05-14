@@ -183,8 +183,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import axios from 'axios'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import http from '@/utils/http'
 
 const route = useRoute()
 const promoterID = ref('')
@@ -197,6 +197,16 @@ onMounted(() => {
   promoterID.value = route.query.p || ''
 })
 
+// 兼容多种错误返回结构（503/400/500），把后端 msg 提取出来给作者看清"为啥不让授权"
+function extractError(e) {
+  return (
+    e?.response?.data?.msg ||
+    e?.response?.data?.error ||
+    e?.message ||
+    '生成授权链接失败'
+  )
+}
+
 async function startAuth() {
   if (!agreed.value) {
     ElMessage.warning('请先阅读并同意服务协议')
@@ -204,18 +214,27 @@ async function startAuth() {
   }
   loading.value = true
   try {
-    const { data } = await axios.get('/api/v1/auth/wx-component/url', {
+    const { data } = await http.get('/api/v1/auth/wx-component/url', {
       params: promoterID.value ? { promoter_id: promoterID.value } : {},
     })
     if (data.code !== 0 || !data.data?.auth_url) {
-      ElMessage.error(data.msg || '生成授权链接失败')
-      loading.value = false
-      return
+      throw new Error(data.msg || '生成授权链接失败')
     }
+    // 直跳微信公众平台授权页（同时勾选 135 流量主代运营 + 17 代码管理 双权限集）
     window.location.href = data.data.auth_url
   } catch (e) {
-    ElMessage.error(e.response?.data?.msg || e.message || '请求失败')
     loading.value = false
+    const msg = extractError(e)
+    // 平台尚未收到 component_verify_ticket 时给特殊提示，避免作者误以为"系统坏了"
+    if (msg.includes('verify_ticket') || msg.includes('未配置')) {
+      ElMessageBox.alert(
+        '附件通平台正在初始化中（等待微信推送 component_verify_ticket，预计 10 分钟内完成）。请稍后再点击「立即授权接入」。',
+        '平台初始化中',
+        { confirmButtonText: '我知道了' }
+      )
+    } else {
+      ElMessage.error(msg)
+    }
   }
 }
 </script>

@@ -9,18 +9,21 @@ import (
 )
 
 type AuthHandler struct {
-	Svc         *service.Container
-	WxOpen      *wechat.OpenOAuthClient
-	RedirectURI string
+	Svc *service.Container
 }
 
 func NewAuthHandler(svc *service.Container) *AuthHandler {
+	return &AuthHandler{Svc: svc}
+}
+
+// openClient 每次请求从最新配置（DB 优先）构造客户端，支持热更新。
+// 返回 (client, redirectURI, ok)；ok=false 表示网站应用未配置。
+func (h *AuthHandler) openClient() (*wechat.OpenOAuthClient, string, bool) {
 	cfg := config.GetOpenPlatformConfig()
-	return &AuthHandler{
-		Svc:         svc,
-		WxOpen:      wechat.NewOpenOAuthClient(cfg.AppID, cfg.AppSecret),
-		RedirectURI: cfg.RedirectURI,
+	if cfg.AppID == "" || cfg.AppSecret == "" {
+		return nil, "", false
 	}
+	return wechat.NewOpenOAuthClient(cfg.AppID, cfg.AppSecret), cfg.RedirectURI, true
 }
 
 // AdminLogin POST /api/v1/auth/admin/login
@@ -44,7 +47,12 @@ func (h *AuthHandler) AdminLogin(c *gin.Context) {
 // ScanLoginURL GET /api/v1/auth/scan/url
 func (h *AuthHandler) ScanLoginURL(c *gin.Context) {
 	state := c.DefaultQuery("state", "login")
-	url := h.WxOpen.BuildLoginURL(h.RedirectURI, state)
+	client, redirectURI, ok := h.openClient()
+	if !ok {
+		Fail(c, 503, "微信扫码登录未配置")
+		return
+	}
+	url := client.BuildLoginURL(redirectURI, state)
 	OK(c, gin.H{"url": url})
 }
 
@@ -70,14 +78,19 @@ func (h *AuthHandler) WechatLogin(c *gin.Context) {
 		Fail(c, 400, "参数错误")
 		return
 	}
+	client, _, ok := h.openClient()
+	if !ok {
+		Fail(c, 503, "微信扫码登录未配置")
+		return
+	}
 	// code → access_token + openid + unionid
-	tokenResp, err := h.WxOpen.Code2Token(req.Code)
+	tokenResp, err := client.Code2Token(req.Code)
 	if err != nil {
 		FailErr(c, err)
 		return
 	}
 	// 获取用户信息
-	userInfo, err := h.WxOpen.UserInfo(tokenResp.AccessToken, tokenResp.OpenID)
+	userInfo, err := client.UserInfo(tokenResp.AccessToken, tokenResp.OpenID)
 	if err != nil {
 		FailErr(c, err)
 		return

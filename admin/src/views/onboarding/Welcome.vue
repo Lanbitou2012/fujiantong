@@ -65,12 +65,14 @@ async function handleStart() {
   // 跳转到微信扫码登录，带 promoter_id
   try {
     const { data } = await axios.get('/api/v1/auth/scan/url', { params: { state: promoterID ? `promoter_${promoterID}` : 'onboarding' } })
-    if (data.code === 0) {
+    if (data.code === 0 && data.data?.url) {
       window.location.href = data.data.url
+      return
     }
+    // 未配置网站应用：降级到账号登录页（保留推广员 ID）
+    router.push({ path: '/login', query: promoterID ? { p: promoterID } : {} })
   } catch (e) {
-    // 微信开放平台未配置时降级为账号登录
-    router.push('/login')
+    router.push({ path: '/login', query: promoterID ? { p: promoterID } : {} })
   }
 }
 </script>

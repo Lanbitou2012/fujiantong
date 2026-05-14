@@ -1,0 +1,45 @@
+.loading-state, .error-state {
+  text-align: center; padding: 120rpx 32rpx; color: #999;
+}
+.error-icon { font-size: 80rpx; }
+.error-msg { font-size: 30rpx; margin: 24rpx 0; color: #f56c6c; }
+
+.file-card {
+  text-align: center;
+  padding: 48rpx 32rpx;
+}
+.file-icon-large {
+  width: 140rpx; height: 140rpx; margin: 0 auto 24rpx;
+  border-radius: 20rpx;
+  color: #fff; font-size: 36rpx; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  text-transform: uppercase;
+}
+.file-name-large {
+  font-size: 32rpx; color: #333; word-break: break-all;
+  line-height: 1.5; margin-bottom: 24rpx;
+}
+.file-meta-row {
+  display: flex; gap: 24rpx; justify-content: center;
+  font-size: 24rpx; color: #888; margin: 8rpx 0;
+}
+
+.unlock-card { text-align: center; padding: 48rpx 32rpx; }
+.unlock-title { font-size: 32rpx; font-weight: 600; color: #333; }
+.unlock-desc { font-size: 26rpx; color: #888; margin: 16rpx 0 32rpx; }
+.unlock-btn { margin-bottom: 16rpx; }
+.unlock-tip { display: block; }
+
+.download-card {
+  text-align: center; padding: 48rpx 32rpx;
+  background: #f0f9eb; border: 2rpx solid #c2e7b0;
+}
+.success-icon { font-size: 80rpx; }
+.success-msg { font-size: 30rpx; color: #67c23a; font-weight: 600; }
+
+.privacy-note { background: #fafafa; }
+.privacy-title { font-size: 26rpx; font-weight: 600; margin-bottom: 16rpx; color: #555; }
+.privacy-text {
+  font-size: 24rpx; color: #888; line-height: 1.7; margin-bottom: 8rpx;
+}
+.link { color: #409eff; }

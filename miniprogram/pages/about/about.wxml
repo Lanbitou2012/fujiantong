@@ -1,0 +1,30 @@
+<view class="page" style="--primary-color: {{ primaryColor }};">
+  <view class="card about-card">
+    <view class="brand-name">{{ authorName }}</view>
+    <view class="brand-sub">由附件通技术支持</view>
+  </view>
+
+  <view class="card">
+    <view class="row" bindtap="openCustomer">
+      <view class="row-label">联系客服</view>
+      <view class="row-value">{{ customerServiceWxId }}</view>
+    </view>
+    <view class="row" bindtap="openPrivacy">
+      <view class="row-label">隐私保护指引</view>
+      <view class="row-arrow">›</view>
+    </view>
+    <view class="row" bindtap="openAgreement">
+      <view class="row-label">用户服务协议</view>
+      <view class="row-arrow">›</view>
+    </view>
+    <view class="row" bindtap="openUgcDeclare">
+      <view class="row-label">UGC 内容声明</view>
+      <view class="row-arrow">›</view>
+    </view>
+  </view>
+
+  <view class="card text-center">
+    <view class="text-small text-muted">附件通模板版本 v1.0.0</view>
+    <view class="text-small text-muted mt-16">© 2026 附件通 · 保留所有权利</view>
+  </view>
+</view>

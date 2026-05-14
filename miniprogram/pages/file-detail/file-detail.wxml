@@ -1,0 +1,62 @@
+<view class="page" style="--primary-color: {{ primaryColor }};">
+  <!-- 加载态 -->
+  <view class="loading-state" wx:if="{{ loading }}">
+    <view>加载中...</view>
+  </view>
+
+  <!-- 错误态 -->
+  <view class="error-state" wx:elif="{{ error }}">
+    <view class="error-icon">⚠️</view>
+    <view class="error-msg">{{ error }}</view>
+    <button class="btn-primary mt-32" bindtap="goHome">返回首页</button>
+  </view>
+
+  <!-- 文件详情 -->
+  <block wx:elif="{{ file }}">
+    <view class="card file-card">
+      <view class="file-icon-large" style="background: {{ primaryColor }};">
+        {{ file.ext }}
+      </view>
+      <view class="file-name-large">{{ file.name }}</view>
+      <view class="file-meta-row">
+        <view class="meta-item">📦 {{ file.size_text }}</view>
+        <view class="meta-item">👤 {{ file.author_name }}</view>
+      </view>
+      <view class="file-meta-row">
+        <view class="meta-item">👁 {{ file.view_count }} 浏览</view>
+        <view class="meta-item">⬇ {{ file.download_count }} 下载</view>
+      </view>
+    </view>
+
+    <!-- 解锁状态：未观看广告 -->
+    <view class="card unlock-card" wx:if="{{ !unlocked }}">
+      <view class="unlock-title">观看广告即可解锁下载</view>
+      <view class="unlock-desc">作者通过广告获得收益持续创作，感谢支持 🙏</view>
+      <button class="btn-primary unlock-btn" bindtap="onWatchAd" loading="{{ adLoading }}">
+        🎬 观看广告解锁下载
+      </button>
+      <view class="unlock-tip text-small text-muted">广告时长约 15-30 秒，完整观看即可</view>
+    </view>
+
+    <!-- 已解锁：显示下载按钮 -->
+    <view class="card download-card" wx:else>
+      <view class="success-icon">✅</view>
+      <view class="success-msg">已解锁，请点击下载</view>
+      <button class="btn-primary mt-24" open-type="getUserInfo" bindtap="onDownload">
+        📥 下载附件
+      </button>
+      <view class="text-small text-muted mt-16">
+        部分类型在小程序内打开预览，其他类型可保存到「微信→文件」
+      </view>
+    </view>
+
+    <!-- 隐私与免责声明 -->
+    <view class="card privacy-note">
+      <view class="privacy-title">📋 内容声明</view>
+      <view class="privacy-text">本附件由作者「{{ file.author_name }}」自行上传，附件通仅提供技术支持。</view>
+      <view class="privacy-text">作者上传时已勾选合规声明，平台已进行内容机审/复审。</view>
+      <view class="privacy-text">如内容有版权异议或违规问题，请联系：</view>
+      <view class="privacy-text">📧 客服微信：<text class="link" bindtap="copyCustomer">{{ customerServiceWxId || 'fjt_helper' }}</text></view>
+    </view>
+  </block>
+</view>

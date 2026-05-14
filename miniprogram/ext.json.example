@@ -1,0 +1,21 @@
+{
+  "extEnable": true,
+  "extAppid": "wxXXXXXXXXXXXXXXXX",
+  "ext": {
+    "platformUserId": "uid_demo",
+    "authorName": "示例作者工作台",
+    "primaryColor": "#3B82F6",
+    "adUnitIds": {
+      "splash": "adunit_splash_demo",
+      "rewardedVideo": "adunit_rewarded_demo",
+      "interstitial": "adunit_interstitial_demo"
+    },
+    "apiBaseUrl": "https://fujian.5g6g.top",
+    "customerServiceWxId": "fjt_helper",
+    "privacyVersion": "v2.1"
+  },
+  "window": {
+    "navigationBarTitleText": "示例作者工作台",
+    "navigationBarBackgroundColor": "#3B82F6"
+  }
+}

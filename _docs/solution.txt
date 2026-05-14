@@ -1,0 +1,211 @@
+﻿【流量主代运营】广告变现解决方案
+本文档主要面向服务商，提供代开发小程序变现解决方案基础介绍和文档索引。
+此文档持续更新，目前为V3.0版本，最近一次更新于2023.12.7。
+
+模式定义和简介
+通常地，小程序接入微信广告组件进行变现的开发者，我们称之为“流量主”。
+针对独立开发的小程序，低门槛广告变现开发，即可上线广告获得收益。
+         
+小程序接入广告组件示意图
+
+然而，针对代开发小程序，由于商家本身不参与小程序的开发和维护，其蕴藏着的商业价值尚未得到激发。同时，服务商伙伴在开发环节承担着重要作用，同样期待获得持续性收入。
+为帮助广大代开发小程序商家进行流量变现，让服务商伙伴享受微信生态带来的商业价值。微信广告联合微信开放平台，推出「小程序流量主代运营」模式，即引入服务商（即“小程序代开发服务商”），借助官方工具能力，协助小程序商家进行流量变现，并共享广告收益，获得可持续商业化收入补充。
+
+「流量主代运营」模式合作示意图
+
+
+能力优势和特点
+1次模板开发，批量商家复用
+支持服务商复用代开发「模板小程序」能力，通过广告代码预埋，实现商家小程序批量覆盖，降低广告组件技术接入成本。
+
+模板小程序广告预埋示意图
+
+核心变现能力API接口支持
+对标独立开发的小程序能力支持，为便于服务商批量化操作，将核心能力全量接口化，服务商可基于小程序授权状态，进行例行化接口调用和广告上线。且可将相关能力进行封装，通过商家管理后台提供给商家使用。
+
+广告变现代运营API接口能力
+
+灵活分账比例，平台统一结算
+支持服务商和商家之间自定义分账比例，平台在授权签约环节提供合规流程支持，在完成授权的同时，一步到位完成比例约定。同时，由微信广告每半月按约定比例进行分账结算，免去服务商二次结算的财务压力。
+
+「流量主代运营」权限集商家授权流程示意图
+
+
+接入全流程和步骤拆解
+
+「流量主代运营」模式全流程流转图
+简化流程：
+
+
+
+步骤一：服务商开通「流量主代运营」功能
+前置准备：
+①财务资料：用于后续广告收入提现
+资料项
+输入方式
+备注
+账号主体名称
+手动输入
+与注册账号主体保持一致
+统一社会信用代码
+手动输入
+18位统一社会信用代码
+营业执照照片
+手动上传图片
+支持png、jpeg、bmp格式，文件大小不超过2M
+银行账号
+手动输入
+确保银行账号和开户名称对应无误
+开户银行所在地
+筛选项
+办理开户手续的银行营业网点，若不确定支行名称，建议问询开户银行。
+开户银行
+筛选项
+
+开户支行
+筛选项
+
+开户证明照片
+手动上传图片
+请确保信息无误并加盖公司公章，支持png、jpeg、bmp格式，文件大小不超过2M
+结算单邮箱
+手动输入
+用于每半月接收结算单
+联系人
+手动输入
+用于后续有需要时联系
+联系电话
+手动输入
+
+企业地址
+手动输入
+
+②基础资料：用于重要通知信息下发
+资料项
+输入方式
+备注
+项目管理员微信号
+手动输入
+最少1个，最多20个，每行1个
+后续审核驳回、财务结算等通知信息，将通过预留的微信号进行消息下发，避免错过重要信息
+
+操作步骤：
+①路径：HYPERLINK https://fuwu.weixin.qq.com/ normalLink \tdfe -10 \tdlt text \tdsub normalLink \tdkey y3ohsv \tdindr 0服务商平台 -> 右上角头像 -> 我的工作台 -> 小程序 -> 流量主代运营
+附HYPERLINK https://docs.qq.com/doc/DVkF6V05FaUV4b0dT docLink \tdfe 0 \tdlt inline \tdlf FromPaste \l \tdsub docLink \tdkey duye1t【流量主代运营】服务商平台使用指引，包含第一次使用常见问题QA
+（原有入口：HYPERLINK https://open.weixin.qq.com/ normalLink \tdfe -10 \tdlt text \tdsub normalLink \tdkey mockmg微信开放平台 -> 管理中心 -> 第三方平台 -> 详情 -> 流量主代运营，后续将迁移下线）
+②流程：找到对应页面并准备好相关信息后，按页面指引逐步完成即可
+服务商勾选协议，开通【流量主代运营】功能
+
+「流量主代运营」服务商管理后台
+其他备注：
+审核时效：整体功能审核1小时内完成，财务资料审核预计1-3个工作日完成
+
+步骤二：服务商确认广告方案，并完成模板小程序开发
+前置准备：
+充分阅读以下文档，会让开发工作事半功倍
+资料项
+链接
+备注
+广告位接入指引
+HYPERLINK https://docs.qq.com/pdf/DVldjcnVocFpsYkJj? docLink \tdfu https://docs.qq.com/pdf/DVldjcnVocFpsYkJj? \tdfn %u5E7F%u544A%u4F4D%u63A5%u5165%u6307%u5F15 \tdlf FromDialog \tdfe 6 \tdlt inline 广告位接入指引
+包含需要进行代码开发和嵌入的所有小程序广告组件的接入指引，了解组件调用方式
+广告运营规范
+HYPERLINK https://ad.weixin.qq.com/main.html#/docs/74 docLink \tdfe -10 \tdfu https://ad.weixin.qq.com/main.html#/docs/74 \tdfn %u5E7F%u544A%u8FD0%u8425%u89C4%u8303 \tdlt inline 广告运营规范
+广告组件使用规范，避免错误使用导致处罚
+广告变现方法论
+HYPERLINK https://doc.weixin.qq.com/doc/w3_ANoAoAbqAEoJu4HEO5mRW6O6n1C1f?scode=AJEAIQdfAAooQ091haANoAoAbqAEo docLink \tdfe 0 \tdfu https://doc.weixin.qq.com/doc/w3_ANoAoAbqAEoJu4HEO5mRW6O6n1C1f?scode=AJEAIQdfAAooQ091haANoAoAbqAEo \tdft Doc \tdfid i.1970325010981265.1688851117154522_w3.671957809qoLj \tdfn %u5E7F%u544A%u53D8%u73B0%u63D0%u6548%u65B9%u6CD5%u8BBA \tdlt inline \tdlf FromInput 广告变现提效方法论
+快速了解广告收益的构成，以及如何进行收益效率提升
+行业化接入建议
+HYPERLINK https://docs.qq.com/doc/DVkV4SXJ0SHVTcU1F docLink \tdfe 0 \tdfu https://docs.qq.com/doc/DVkV4SXJ0SHVTcU1F \tdfn %u7535%u5546 \tdlt inline 电商HYPERLINK https://docs.qq.com/doc/DVnpBaVBDSWdaTWRZ docLink \tdfe 0 \tdfu https://docs.qq.com/doc/DVnpBaVBDSWdaTWRZ \tdfn %u9910%u996E \tdlt inline 餐饮
+根据常见行业小程序布局，提供广告接入建议
+操作步骤：
+①广告接入方案确认
+基于实际情况，明确接入的广告组件类型、接入页面位置、展示时机等。
+②模板小程序代码固化
+此处代码固化非实际广告上线，而是借助小程序版本发布，做广告代码预埋；后续小程序完成流量主代运营授权后，服务商即可快速代运营上线广告，无需单独进行版本发布。
+
+
+步骤三：服务商设置分成比例，并获得小程序授权
+前置准备：
+授权签约过程中，将由商家进行分账比例确认，需要服务商在发起流程前进行设置。
+服务商通过接口设置或更改分账比例，不代表比例生效；需要通过下述步骤，由商家在更新权限集授权流程中进行确认，次日起实际生效。
+设置方式
+接口文档
+备注
+默认分账比例
+HYPERLINK https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ams/percentage/SetShareRatio.html docLink \tdkey bmym7s \tdfe -10 \tdfu https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ams/percentage/SetShareRatio.html \tdfn %u6BD4%u4F8B%u8BBE%u7F6E%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdlt text \tdds 微信开发者平台文档 \tdfvi https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico \tdlf FromPaste 比例设置 | 微信开放文档
+针对服务商账号下的所有商家生效
+自定义分账比例
+
+针对单个商家小程序进行比例设置，商家进行授权签约时优先使用该比例，若无该比例则使用默认分成比例。
+注意：在商家进行授权签约流程前，若服务商未设置分账比例，则默认服务商和小程序的分账比例为0:10（服务商无收益）。
+
+操作流程：
+①服务商配置「流量主代运营」权限集
+配置路径为：HYPERLINK https://open.weixin.qq.com/ normalLink \tdfe -10 \tdlt text \tdsub normalLink \tdkey srkqar微信开放平台 -> 第三方平台 -> 开发配置 -> 权限集 -> 流量主代运营权限集（id135）
+②服务商放置授权链接
+
+详细指引：HYPERLINK https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/operation/authorization/authorization_management.html docLink \tdfu https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/operation/authorization/authorization_management.html \tdfn %u6388%u6743%u76F8%u5173%u64CD%u4F5C%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdfe -10 \tdlt inline \tdds 微信开发者平台文档 \tdfvi https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico 授权相关操作 | 微信开放文档   |    HYPERLINK https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/Before_Develop/Authorization_Process_Technical_Description.html docLink \tdfu https://developers.weixin.qq.com/doc/oplatform/Third-party_Platforms/2.0/api/Before_Develop/Authorization_Process_Technical_Description.html \tdfn %u6388%u6743%u6D41%u7A0B%u6280%u672F%u8BF4%u660E%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdfe -10 \tdlt inline \tdds 微信开发者平台文档 \tdfvi https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico 授权流程技术说明 | 微信开放文档
+注意：授权链接拼接方式中，H5版请务必使用新版。旧版无法拉起签约环节！
+
+③商家完成授权签约
+
+「流量主代运营」权限集商家授权流程示意图
+
+注意：建议服务商充分引导商家进行「流量主代运营」权限集授权时，在条款签署环节需要手动勾选相关协议后再进行确认，否则服务商将无法实际进行代运营操作。
+ 
+模版消息触达授权能力 *NEW!
+为帮助更高效引导小程序商家授权流量主代运营权限，平台支持服务商通过调用接口，触发模板消息，通知商家确认更新权限集。
+详细指引：HYPERLINK https://docs.qq.com/doc/DVktDZXROVlFkQ2ZL docLink \tdfe 0 \tdlt inline \tdlf FromPaste \l \tdsub docLink \tdkey x0pqtr【流量主代运营】模版消息触达授权能力
+注意：微信开放平台-第三方平台不支持该能力，请服务商前往服务商平台操作（路径：HYPERLINK https://fuwu.weixin.qq.com/ normalLink \tdfe -10 \tdlt text \tdsub normalLink \tdkey c5qf3m \tdindr 0服务商平台 -> （右上角头像）我的工作台 -> 小程序 -> 流量主代运营）
+
+模板消息触达样式和内容参考
+
+案例补充
+服务商微盟，基于商家的使用习惯，在管理后台提供变现开通入口，承接有意愿商家主动进行授权签约，转化为流量主进行变现，并提供客户成功培训，帮助其快速上手。
+
+服务商微盟：商家管理后台
+服务商思迅，则基于服务号渠道消息触达，引导商家管理员进行授权签约，大大降低了人工触达的成本，同时触达目标准确性高，转化机会大。
+
+
+步骤四：服务商例行化调用接口，进行批量化广告管理
+前置准备：
+①每日刷新获取完成「流量主代运营」权限集授权的小程序列表
+HYPERLINK https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerList.html docLink \tdfu https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerList.html \tdfn %u62C9%u53D6%u5DF2%u6388%u6743%u7684%u5E10%u53F7%u4FE1%u606F%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdfe -10 \tdlt inline \tdds 微信开发者平台文档 \tdfvi https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico \tdsub docLink \tdindr 0 \tdkey j4yl0c拉取已授权的账号信息 | 微信开放文档
+HYPERLINK https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerInfo.html docLink \tdfu https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/authorization-management/getAuthorizerInfo.html \tdfn %u83B7%u53D6%u6388%u6743%u5E10%u53F7%u8BE6%u60C5%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdfe -10 \tdlt inline \tdds 微信开发者平台文档 \tdfvi https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico \tdsub docLink \tdindr 0 \tdkey kwi1dy获取授权账号详情 | 微信开放文档
+②通过接口，批量判断哪些小程序满足流量主开通门槛，进行标记
+流量主开通门槛：小程序历史累计访问uv大于1000
+操作流程
+①流量主开通
+②广告位管理（广告位ID申请、编辑等）
+③广告管理（包括广告主、广告行业屏蔽设置和查询等）
+以上操作均通过API接口实现，具体调用方式参考 HYPERLINK https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ams/ad-mgnt/AgencyCreateAdunit.html docLink \tdkey 5umayo \tdfe -10 \tdfu https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ams/ad-mgnt/AgencyCreateAdunit.html \tdfn %u5E7F%u544A%u7BA1%u7406%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdlt text \tdds 微信开发者平台文档 \tdfvi https://res.wx.qq.com/a/wx_fed/assets/res/NTI4MWU5.ico \tdlf FromPaste 广告管理 | 微信开放文档。
+案例补充
+服务商思迅，通过在管理后台提供操作界面，商家可视化了解和确认广告接入方案，默认接入固定广告组件组合，同时支持其操作进行广告位调整，在保障高效上线广告位变现的同时，支持商家自定义细节。
+  
+服务商思迅：商家管理后台广告管理板块
+
+步骤五：广告展示、收益和分账
+
+「流量主代运营」服务商管理后台
+对于小程序商家，可通过 MP后台 -> 流量主 -> 财务管理 -> 收入结算 结算，详细结算指引参考HYPERLINK https://docs.qq.com/doc/DVmV3YlVuT2FGQXZE?&u=54770bcc41a043149b1e7988de38920a docLink \tdkey ccl85r \tdfe 0 \tdfu https://docs.qq.com/doc/DVmV3YlVuT2FGQXZE?&u=54770bcc41a043149b1e7988de38920a \tdfn %u3010%u6D41%u91CF%u4E3B%u4EE3%u8FD0%u8425%u3011%u7ED3%u7B97%u6307%u5F15%uFF08%u5546%u5BB6%uFF09 \tdlt inline \tdlf FromPaste 【流量主代运营】结算指引（商家），服务商可以进行引导。
+特别关注，针对主体为个体工商户类型的小程序，正常情况可走开票结算流程，也可以通过委托个人收款方式，代征代扣相关税费后直接打款，免去开票流程。
+
+对于服务商，可通过 微信开放平台 -> 管理中心 -> 第三方平台  -> 流量主代运营 -> 财务管理 结算，详细结算指引参考HYPERLINK https://docs.qq.com/doc/DVk1ESnBwQlp0VHR3?&u=54770bcc41a043149b1e7988de38920a docLink \tdkey 6rwjko \tdfe 0 \tdfu https://docs.qq.com/doc/DVk1ESnBwQlp0VHR3?&u=54770bcc41a043149b1e7988de38920a \tdfn %u3010%u6D41%u91CF%u4E3B%u4EE3%u8FD0%u8425%u3011%u7ED3%u7B97%u6307%u5F15%uFF08%u670D%u52A1%u5546%uFF09 \tdlt inline \tdlf FromPaste 【流量主代运营】结算指引（服务商）。
+
+
+「流量主代运营」模式收入分账和流转
+服务商、小程序维度广告详细数据和收益结算查看，
+数据看板（适合产运研日常使用，全面&可视）：HYPERLINK https://docs.qq.com/doc/DVmFMaHlDS2dGcGhP docLink \tdfe 0 \tdlt inline \tdlf FromPaste \l \tdsub docLink \tdkey kod0mv【流量主代运营】数据分析能力升级
+数据接口（适合研发自动化数据获取和加工）： HYPERLINK https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ams/settlement/GetSettlement.html docLink \tdkey  \tdfe -10 \tdfu https://developers.weixin.qq.com/doc/oplatform/openApi/OpenApiDoc/ams/settlement/GetSettlement.html \tdfn %u5E7F%u544A%26%u7ED3%u7B97%u6570%u636E%20%7C%20%u5FAE%u4FE1%u5F00%u653E%u6587%u6863 \tdlt text \tdlf FromDialog 广告&结算数据 | 微信开放文档
+
+整体结算逻辑，由平台扣除50%的渠道技术服务成本后，将另外50%广告变现收入，按照服务商和小程序商家约定的比例，由平台进行结算。
+
+
+
+如你有任何疑问，或者有进一步意愿，请添加微信广告流量主助手微信，我们将1对1服务！
+
+添加后，请主动发送信息“流量主代运营+姓名+公司+岗位”，方便我们快速识别和支持~
+
+
+

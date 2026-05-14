@@ -1,0 +1,17 @@
+.about-card {
+  text-align: center;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-color));
+  color: #fff;
+}
+.brand-name { font-size: 40rpx; font-weight: 700; }
+.brand-sub { font-size: 24rpx; opacity: 0.8; margin-top: 8rpx; }
+
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28rpx 0; border-bottom: 1rpx solid #f0f0f0;
+}
+.row:last-child { border-bottom: none; }
+.row-label { font-size: 28rpx; color: #333; }
+.row-value { font-size: 26rpx; color: #888; }
+.row-arrow { color: #ccc; font-size: 32rpx; }
+.text-center { text-align: center; }

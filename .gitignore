@@ -1,0 +1,52 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# 环境变量
+.env
+*.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 上传文件（本地存储模式）
+server/uploads/
+
+# Node
+node_modules/
+dist/
+.nuxt/
+
+# 日志
+*.log
+
+# 大体积归档/备份（不入 git）
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
+deploy/
+
+# 历史/备份文档
+*.bak.md
+CORE_ARCHITECTURE.v*.bak.md
+
+# 后端编译产物（在服务器上由 deploy.sh 生成）
+server/fujian-tong
+server/fujian-tong.new
+server/public/
+server/logs/

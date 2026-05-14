@@ -1,0 +1,43 @@
+<view class="page" style="--primary-color: {{ primaryColor }};">
+  <!-- 作者品牌 Header -->
+  <view class="hero" style="background: linear-gradient(135deg, {{ primaryColor }}, {{ primaryColor }}cc);">
+    <view class="hero-title">{{ authorName }}</view>
+    <view class="hero-sub">在公众号文章里点击附件链接 → 即可在此查看下载</view>
+  </view>
+
+  <!-- 引导卡片 -->
+  <view class="card guide-card">
+    <view class="guide-title">📎 如何使用</view>
+    <view class="guide-step">
+      <view class="step-num">1</view>
+      <view class="step-text">在 {{ authorName }} 公众号文章里找到带「附件」的蓝色文本链接</view>
+    </view>
+    <view class="guide-step">
+      <view class="step-num">2</view>
+      <view class="step-text">点击链接，自动跳转到本小程序的附件详情页</view>
+    </view>
+    <view class="guide-step">
+      <view class="step-num">3</view>
+      <view class="step-text">观看一段广告（约 15 秒）即可解锁下载</view>
+    </view>
+  </view>
+
+  <!-- 推荐附件区 (V1.5: 拉作者最近发表的附件) -->
+  <view class="card" wx:if="{{ recentFiles.length > 0 }}">
+    <view class="section-title">最近发表</view>
+    <block wx:for="{{ recentFiles }}" wx:key="id">
+      <view class="file-row" bindtap="onFileTap" data-code="{{ item.download_code }}">
+        <view class="file-icon">{{ item.ext }}</view>
+        <view class="file-info">
+          <view class="file-name">{{ item.original_name }}</view>
+          <view class="file-meta">{{ item.size_text }} · {{ item.download_count }} 下载</view>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view class="empty-tip" wx:if="{{ !recentFiles.length }}">
+    <view>暂无发表的附件</view>
+    <view class="text-small text-muted mt-16">回到公众号文章点击附件链接查看</view>
+  </view>
+</view>

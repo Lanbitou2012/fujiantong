@@ -45,6 +45,11 @@ if [[ "$MODE" == "all" || "$MODE" == "frontend" ]]; then
   echo "==> [3/5] 安装 admin 依赖"
   npm install --prefix admin --silent --no-audit --no-fund
 
+  # 修复某些 npm 镜像/Linux 文件系统下 .bin 缺失可执行位的问题
+  if [ -d admin/node_modules/.bin ]; then
+    chmod -R +x admin/node_modules/.bin 2>/dev/null || true
+  fi
+
   echo "==> [4/5] 编译 admin（输出到 server/public/）"
   npm run build --prefix admin
 fi

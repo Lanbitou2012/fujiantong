@@ -88,7 +88,10 @@ func (h *SettingsHandler) GetPlatformSettings(c *gin.Context) {
 }
 
 // UpdatePlatformSettings PUT /api/v1/admin/settings/platform
-// 接收前端提交的部分字段；空字符串视为不修改（保留原值）；非空则更新
+// 接收前端提交的部分字段；
+//   - 敏感字段（secret/key）：空字符串视为不修改（保留原值）
+//   - 普通字段：直接覆盖（含空字符串，用于清空）
+//   - 特殊值 "__CLEAR__"：强制清空（用于清掉敏感字段）
 func (h *SettingsHandler) UpdatePlatformSettings(c *gin.Context) {
 	adminID := middleware.CurrentUserID(c)
 	var req map[string]string
@@ -119,6 +122,11 @@ func (h *SettingsHandler) UpdatePlatformSettings(c *gin.Context) {
 	for k, v := range req {
 		cat, ok := allowedKeys[k]
 		if !ok {
+			continue
+		}
+		// 特殊值 __CLEAR__：强制清空（无论是否敏感字段）
+		if v == "__CLEAR__" {
+			groups[cat][k] = ""
 			continue
 		}
 		// 敏感字段空字符串 = 保留旧值，不更新

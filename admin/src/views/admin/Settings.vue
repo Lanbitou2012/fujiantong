@@ -95,6 +95,7 @@
           <el-form-item>
             <el-button type="primary" :loading="saveLoading" @click="saveSettings">保存微信配置</el-button>
             <el-button @click="loadSettings">重新加载</el-button>
+            <el-button type="danger" plain @click="clearWebsiteApp">清除网站应用配置</el-button>
           </el-form-item>
         </el-card>
       </el-tab-pane>
@@ -278,6 +279,34 @@ async function saveSettings() {
       await loadSettings()
     } else {
       ElMessage.error(data.msg || '保存失败')
+    }
+  } finally {
+    saveLoading.value = false
+  }
+}
+
+async function clearWebsiteApp() {
+  try {
+    await ElMessageBox.confirm(
+      '将清除网站应用（扫码登录）所有配置，第三方平台配置不受影响。继续吗？',
+      '清除网站应用配置',
+      { type: 'warning' }
+    )
+  } catch {
+    return
+  }
+  saveLoading.value = true
+  try {
+    const { data } = await http.put('/api/v1/admin/settings/platform', {
+      wechat_open_appid: '',
+      wechat_open_appsecret: '__CLEAR__',
+      wechat_open_redirect_uri: '',
+    })
+    if (data.code === 0) {
+      ElMessage.success('已清除网站应用配置')
+      await loadSettings()
+    } else {
+      ElMessage.error(data.msg || '清除失败')
     }
   } finally {
     saveLoading.value = false

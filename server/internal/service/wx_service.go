@@ -82,40 +82,75 @@ func (c *Container) EnsureAuthorizerToken(componentAppID, componentSecret, appID
 }
 
 // HandleAuthorizationEvent 处理授权事件（新增 / 更新授权）
-func (c *Container) HandleAuthorizationEvent(componentAppID, componentSecret, authCode string) error {
+// 返回授权对应的 user，便于前端回调时签发 token。
+func (c *Container) HandleAuthorizationEvent(componentAppID, componentSecret, authCode string) (*model.User, error) {
 	componentToken, err := c.EnsureComponentToken(componentAppID, componentSecret)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	queryResp, err := c.WxComponent.QueryAuth(componentToken, componentAppID, authCode)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	info := queryResp.AuthorizationInfo
 	appID := info.AuthorizerAppID
 	now := time.Now()
 
+	// 拉小程序资料（昵称 / 头像 / 主体）
+	var nickname, avatar, principal string
+	if detail, derr := c.WxComponent.GetAuthorizerInfo(componentToken, componentAppID, appID); derr == nil {
+		nickname = detail.AuthorizerInfo.NickName
+		avatar = detail.AuthorizerInfo.HeadImg
+		principal = detail.AuthorizerInfo.PrincipalName
+	} else {
+		log.Printf("[WxAuth] GetAuthorizerInfo 失败（继续）: %v", derr)
+	}
+
+	// 查找用户：先按 bound_appid，再按 principal_name 兜底
+	u, err := c.UserRepo.GetByAppID(appID)
+	if err != nil {
+		// 不存在 → 创建新作者
+		newUser := &model.User{
+			BoundAppID:             appID,
+			Nickname:               nickname,
+			AvatarURL:              avatar,
+			AuthorizerRefreshToken: info.AuthorizerRefreshToken,
+			Status:                 1,
+		}
+		if nickname == "" {
+			newUser.Nickname = "作者_" + appID[len(appID)-6:]
+		}
+		if err := c.UserRepo.Create(newUser); err != nil {
+			return nil, fmt.Errorf("创建作者账号失败: %w", err)
+		}
+		u = newUser
+		log.Printf("[WxAuth] 新作者注册: id=%d appid=%s nickname=%s", u.ID, appID, u.Nickname)
+	} else {
+		// 已存在 → 更新 refresh_token 和资料
+		updates := map[string]any{
+			"authorizer_refresh_token": info.AuthorizerRefreshToken,
+		}
+		if nickname != "" && u.Nickname == "" {
+			updates["nickname"] = nickname
+		}
+		if avatar != "" && u.AvatarURL == "" {
+			updates["avatar_url"] = avatar
+		}
+		_ = c.UserRepo.UpdateFields(u.ID, updates)
+	}
+	_ = principal // 主体名后续如需保存可加字段
+
 	// 写入/更新授权表
 	auth := &model.Authorization{
 		AppID:                  appID,
+		UserID:                 u.ID,
 		AuthorizerRefreshToken: info.AuthorizerRefreshToken,
 		Status:                 "authorized",
 		AuthorizedAt:           &now,
 		GrantedPermissionIDs:   formatFuncInfo(info.FuncInfo),
 	}
-
-	// 关联用户（通过 bound_appid 查找）
-	u, err := c.UserRepo.GetByAppID(appID)
-	if err == nil {
-		auth.UserID = u.ID
-		// 同步 refresh_token 到用户表
-		_ = c.UserRepo.UpdateFields(u.ID, map[string]any{
-			"authorizer_refresh_token": info.AuthorizerRefreshToken,
-		})
-	}
-
 	if err := c.AuthRepo.Upsert(auth); err != nil {
-		return err
+		return u, err
 	}
 
 	// 缓存 authorizer_access_token
@@ -130,7 +165,7 @@ func (c *Container) HandleAuthorizationEvent(componentAppID, componentSecret, au
 	// 触发自动部署流水线（异步）
 	go c.triggerDeployPipeline(componentAppID, componentSecret, appID)
 
-	return nil
+	return u, nil
 }
 
 // HandleDeauthorizationEvent 取消授权

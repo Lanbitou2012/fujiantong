@@ -2,13 +2,17 @@ package api
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strconv"
+	"time"
 
 	"fujiantong/internal/config"
 	"fujiantong/internal/service"
 	"fujiantong/internal/wechat"
+	jwtpkg "fujiantong/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -77,7 +81,7 @@ func (h *WxHandler) ComponentTicket(c *gin.Context) {
 		}
 	case "authorized", "updateauthorized":
 		componentCfg := config.GetComponentConfig()
-		if err := h.Svc.HandleAuthorizationEvent(componentCfg.AppID, componentCfg.AppSecret, msg.AuthCode); err != nil {
+		if _, err := h.Svc.HandleAuthorizationEvent(componentCfg.AppID, componentCfg.AppSecret, msg.AuthCode); err != nil {
 			log.Printf("[WxCallback] 处理授权事件失败: %v", err)
 		}
 	case "unauthorized":
@@ -147,21 +151,54 @@ func (h *WxHandler) ComponentNotify(c *gin.Context) {
 }
 
 // AuthCallback GET /api/v1/wx/component/callback
-// 授权成功回调（用户在微信确认授权后跳回此页）
+// 作者在微信完成授权后，微信浏览器跳回此页：
+//
+//	?auth_code=xxx&expires_in=xxx&promoter_id=N (透传 redirect_uri 里的 query)
+//
+// 流程：换取 refresh_token → 创建/更新作者账号 → 绑推广员 → 签发 JWT → 重定向到前端 /auth-success
 func (h *WxHandler) AuthCallback(c *gin.Context) {
 	authCode := c.Query("auth_code")
 	if authCode == "" {
-		c.String(http.StatusBadRequest, "missing auth_code")
+		c.Redirect(http.StatusFound, "/auth-success?error=missing_auth_code")
 		return
 	}
 	componentCfg := config.GetComponentConfig()
-	if err := h.Svc.HandleAuthorizationEvent(componentCfg.AppID, componentCfg.AppSecret, authCode); err != nil {
+	user, err := h.Svc.HandleAuthorizationEvent(componentCfg.AppID, componentCfg.AppSecret, authCode)
+	if err != nil {
 		log.Printf("[WxCallback] AuthCallback 处理失败: %v", err)
-		c.String(http.StatusInternalServerError, "授权处理失败")
+		c.Redirect(http.StatusFound, "/auth-success?error="+err.Error())
 		return
 	}
-	// 跳转到前端成功页
-	c.Redirect(http.StatusFound, "/auth-success")
+
+	// 绑定推广员（从 query 取，redirect_uri 拼接时塞进来）
+	if pid := c.Query("promoter_id"); pid != "" {
+		if promoterID, _ := strconv.ParseUint(pid, 10, 64); promoterID > 0 {
+			if berr := h.Svc.BindPromoter(user.ID, promoterID); berr != nil {
+				log.Printf("[WxCallback] 绑定推广员 %d 失败: %v", promoterID, berr)
+			}
+		}
+	}
+
+	// 签发 JWT
+	token, err := jwtpkg.GenerateTokenWithOptions(jwtpkg.TokenOptions{
+		UserID:          uint(user.ID),
+		Role:            int8(1), // author
+		RoleName:        "author",
+		AuthorID:        user.ID,
+		AuthorizerAppID: user.BoundAppID,
+		TTL:             7 * 24 * time.Hour,
+	})
+	if err != nil {
+		log.Printf("[WxCallback] 签发 token 失败: %v", err)
+		c.Redirect(http.StatusFound, "/auth-success?error=token_failed")
+		return
+	}
+
+	// 重定向到前端授权成功页，token 放在 hash 里（避免被服务器日志记录）
+	c.Redirect(http.StatusFound, fmt.Sprintf(
+		"/auth-success?appid=%s&user_id=%d#token=%s",
+		user.BoundAppID, user.ID, token,
+	))
 }
 
 // MediaCheckCallback POST /api/v1/wx/media-check/:appid

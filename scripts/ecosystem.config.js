@@ -1,11 +1,14 @@
 // PM2 守护配置：把 Go 二进制当成普通进程托管。
 // 启动命令： pm2 start scripts/ecosystem.config.js
+const path = require('path')
+const PROJECT_DIR = path.resolve(__dirname, '..')
+
 module.exports = {
   apps: [
     {
       name: 'fujiantong',
-      cwd: '/www/wwwroot/fujiantong/server',
-      script: '/www/wwwroot/fujiantong/server/fujian-tong',
+      cwd: path.join(PROJECT_DIR, 'server'),
+      script: path.join(PROJECT_DIR, 'server', 'fujian-tong'),
       // 关键：以二进制方式启动，不要走 node 解释器
       interpreter: 'none',
       exec_mode: 'fork',
@@ -20,8 +23,8 @@ module.exports = {
         SERVER_HOST: '127.0.0.1',
         GIN_MODE: 'release'
       },
-      out_file: '/www/wwwroot/fujiantong/server/logs/pm2-out.log',
-      error_file: '/www/wwwroot/fujiantong/server/logs/pm2-err.log',
+      out_file: path.join(PROJECT_DIR, 'server', 'logs', 'pm2-out.log'),
+      error_file: path.join(PROJECT_DIR, 'server', 'logs', 'pm2-err.log'),
       merge_logs: true,
       time: true
     }

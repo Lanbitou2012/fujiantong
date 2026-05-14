@@ -12,12 +12,18 @@
 # ===========================================================================
 set -e
 
-PROJECT_DIR="/www/wwwroot/fujiantong"
-GO_BIN="/usr/local/go/bin/go"
+# 自动定位项目根目录（脚本所在目录的上一级）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+GO_BIN="${GO_BIN:-$(command -v go || echo /usr/local/go/bin/go)}"
 APP_NAME="fujiantong"
 MODE="${1:-all}"
 
+# 修复 git "dubious ownership"
+git config --global --add safe.directory "$PROJECT_DIR" 2>/dev/null || true
+
 cd "$PROJECT_DIR"
+echo "==> 项目目录: $PROJECT_DIR"
 
 echo "==> [1/5] git pull"
 git fetch origin

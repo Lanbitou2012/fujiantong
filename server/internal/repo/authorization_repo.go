@@ -12,7 +12,7 @@ func NewAuthorizationRepo(db *gorm.DB) *AuthorizationRepo { return &Authorizatio
 
 func (r *AuthorizationRepo) Upsert(a *model.Authorization) error {
 	var existing model.Authorization
-	err := r.DB.Where("appid = ?", a.AppID).First(&existing).Error
+	err := r.DB.Where("app_id = ?", a.AppID).First(&existing).Error
 	if err == gorm.ErrRecordNotFound {
 		return r.DB.Create(a).Error
 	}
@@ -25,7 +25,7 @@ func (r *AuthorizationRepo) Upsert(a *model.Authorization) error {
 
 func (r *AuthorizationRepo) GetByAppID(appID string) (*model.Authorization, error) {
 	var a model.Authorization
-	err := r.DB.Where("appid = ?", appID).First(&a).Error
+	err := r.DB.Where("app_id = ?", appID).First(&a).Error
 	return &a, err
 }
 
